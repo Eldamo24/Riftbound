@@ -101,6 +101,10 @@ namespace Riftbound.Player
             {
                 verticalVelocity.y = -2f;
             }
+            if (animator != null)
+            {
+                animator.SetBool("Grounded", isGrounded);
+            }
         }
 
         private void CalculateCameraRelativeDirection()
@@ -135,6 +139,10 @@ namespace Riftbound.Player
             {
                 verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
                 jumpRequested = false;
+                if (animator != null)
+                {
+                    animator.SetTrigger("Jump");
+                }
             }
             verticalVelocity.y += gravity * Time.deltaTime;
         }
