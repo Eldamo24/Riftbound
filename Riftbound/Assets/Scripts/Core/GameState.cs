@@ -1,7 +1,9 @@
-
-public enum GameState 
+namespace Riftboud.Core
 {
-    MainMenu,
-    Playing,
-    GameOver
+    public enum GameState
+    {
+        MainMenu,
+        Playing,
+        GameOver
+    }
 }

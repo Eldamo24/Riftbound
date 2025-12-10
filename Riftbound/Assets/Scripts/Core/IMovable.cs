@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public interface IMovable
+namespace Riftbound.Core
 {
-    void Move(Vector3 direction);
+    public interface IMovable
+    {
+        void Move(Vector3 direction);
+    }
 }

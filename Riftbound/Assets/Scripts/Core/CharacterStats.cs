@@ -1,7 +1,12 @@
-[System.Serializable]
-public struct CharacterStats 
+
+namespace Riftbound.Core
 {
-    public float maxHealth;
-    public float moveSpeed;
-    public float attackPower;
+    [System.Serializable]
+    public struct CharacterStats
+    {
+        public float maxHealth;
+        public float moveSpeed;
+        public float attackPower;
+    }
 }
+

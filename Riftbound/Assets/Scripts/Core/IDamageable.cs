@@ -1,5 +1,7 @@
-
-public interface IDamageable
+namespace Riftbound.Core
 {
-    void TakeDamage(float amount);
+    public interface IDamageable
+    {
+        void TakeDamage(float amount);
+    }
 }

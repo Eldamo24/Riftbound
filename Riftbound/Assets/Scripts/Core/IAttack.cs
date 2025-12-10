@@ -1,5 +1,8 @@
-
-public interface IAttack
+namespace Riftbound.Core
 {
-    void Attack();
+    public interface IAttack
+    {
+        void Attack();
+    }
 }
+
