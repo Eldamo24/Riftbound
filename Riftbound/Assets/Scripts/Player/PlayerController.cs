@@ -1,10 +1,12 @@
-using System;
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerInputHandler))]
 [RequireComponent(typeof(CharacterController))]
-public class PlayerController : MonoBehaviour
+[RequireComponent(typeof(PlayerInputHandler))]
+public class PlayerController : MonoBehaviour, IMovable, IAttack, IDamageable
 {
+    [Header("References")]
+    [SerializeField] private Transform cameraTransform;
+
     [Header("Stats")]
     [SerializeField] private CharacterStats stats;
 
@@ -22,12 +24,13 @@ public class PlayerController : MonoBehaviour
     private CharacterController controller;
     private PlayerInputHandler input;
 
-    private Vector3 moveInput;
+    private Vector2 moveInputRaw;
+    private Vector3 moveDirection;
     private Vector3 moveVelocity;
     private Vector3 verticalVelocity;
+
     private bool jumpRequested;
     private bool isGrounded;
-
     private float currentHealth;
 
     private void Awake()
@@ -35,7 +38,12 @@ public class PlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInputHandler>();
         currentHealth = stats.maxHealth;
+        if (cameraTransform == null && Camera.main != null)
+        {
+            cameraTransform = Camera.main.transform;
+        }
     }
+
     private void OnEnable()
     {
         input.OnMove += HandleMoveInput;
@@ -53,18 +61,17 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         GroundCheck();
+        CalculateCameraRelativeDirection();
         HandleHorizontalMovement();
         HandleVerticalMovement();
         ApplyMovement();
         RotateTowardsMovement();
     }
 
-
     private void HandleMoveInput(Vector2 inputDir)
     {
-        moveInput = new Vector3(inputDir.x, 0f, inputDir.y);
+        moveInputRaw = inputDir;
     }
-
 
     private void HandleJumpInput()
     {
@@ -82,16 +89,36 @@ public class PlayerController : MonoBehaviour
                 isGrounded = true;
             }
         }
+
         if (isGrounded && verticalVelocity.y < 0)
         {
             verticalVelocity.y = -2f;
         }
     }
 
+    private void CalculateCameraRelativeDirection()
+    {
+        if (moveInputRaw.sqrMagnitude < 0.0001f || cameraTransform == null)
+        {
+            moveDirection = Vector3.zero;
+            return;
+        }
+        Vector3 camForward = cameraTransform.forward;
+        Vector3 camRight = cameraTransform.right;
+        camForward.y = 0f;
+        camRight.y = 0f;
+        camForward.Normalize();
+        camRight.Normalize();
+        Vector3 desiredDirection =
+            camForward * moveInputRaw.y +
+            camRight * moveInputRaw.x;
+        moveDirection = desiredDirection.normalized;
+    }
+
     private void HandleHorizontalMovement()
     {
-        Vector3 targetVelocity = moveInput.normalized * stats.moveSpeed;
-        float lerpSpeed = (moveInput.magnitude > 0.1f) ? acceleration : deceleration;
+        Vector3 targetVelocity = moveDirection * stats.moveSpeed;
+        float lerpSpeed = (moveDirection.sqrMagnitude > 0.001f) ? acceleration : deceleration;
         moveVelocity = Vector3.Lerp(moveVelocity, targetVelocity, lerpSpeed * Time.deltaTime);
     }
 
@@ -113,34 +140,36 @@ public class PlayerController : MonoBehaviour
 
     private void RotateTowardsMovement()
     {
-        Vector3 direction = moveVelocity;
-        direction.y = 0f;
-        if (direction.sqrMagnitude > 0.001f)
+        Vector3 horizontalVelocity = moveVelocity;
+        horizontalVelocity.y = 0f;
+        if (horizontalVelocity.sqrMagnitude > 0.001f)
         {
-            Quaternion targetRot = Quaternion.LookRotation(direction);
+            Quaternion targetRot = Quaternion.LookRotation(horizontalVelocity);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
         }
     }
 
     public void Move(Vector3 direction)
     {
-        moveInput = direction;
+        moveDirection = direction.normalized;
     }
 
     public void Attack()
     {
         Debug.Log("Ataque básico de lanza (placeholder)");
+        // Más adelante: animación + hitbox
     }
 
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
         Debug.Log($"Player recibe daño: {amount}, vida actual: {currentHealth}");
+
         if (currentHealth <= 0f)
         {
             currentHealth = 0f;
             Debug.Log("Player muerto (placeholder)");
+            // Event OnPlayerDied, respawn, etc.
         }
     }
-
 }
