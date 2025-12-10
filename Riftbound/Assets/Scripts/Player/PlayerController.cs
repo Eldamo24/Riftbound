@@ -168,20 +168,11 @@ namespace Riftbound.Player
         {
             if (animator == null)
                 return;
-
-            // Velocidad horizontal (sin contar salto/caída)
             Vector3 horizontalVelocity = moveVelocity;
             horizontalVelocity.y = 0f;
 
             float speed = horizontalVelocity.magnitude;
-
-            // Si querés, podés normalizar a 0–1 dividiendo por moveSpeed:
-            // float normalizedSpeed = speed / stats.moveSpeed;
-
-            // Enviamos la velocidad al Blend Tree
             animator.SetFloat("Speed", speed);
-            // O con damping suave:
-            // animator.SetFloat("Speed", speed, 0.1f, Time.deltaTime);
         }
 
         public void Move(Vector3 direction)
